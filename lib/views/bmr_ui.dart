@@ -1,5 +1,4 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
-
 import 'package:flutter/material.dart';
 
 class BmrUI extends StatefulWidget {
@@ -10,6 +9,15 @@ class BmrUI extends StatefulWidget {
 }
 
 class _BmrUIState extends State<BmrUI> {
+  // 1. เพิ่มตัวแปรสำหรับเก็บสถานะเพศ (เริ่มต้นเป็นเพศชาย)
+  bool isMale = true;
+
+  TextEditingController weightCtrl = TextEditingController();
+  TextEditingController heightCtrl= TextEditingController();
+  TextEditingController ageCtrl= TextEditingController();
+
+  String bmrValue = '0.00';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +45,7 @@ class _BmrUIState extends State<BmrUI> {
               ),
               Center(
                 child: Image.asset(
-                  'assets/images/bmr.png', 
+                  'assets/images/bmr.png',
                   height: 120,
                   errorBuilder: (context, error, stackTrace) {
                     return Icon(
@@ -63,22 +71,26 @@ class _BmrUIState extends State<BmrUI> {
               ),
               Row(
                 children: [
+                  // ปุ่มเพศชาย
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          isMale = true;
+                        });
+                      },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 203, 226, 246),
+                        backgroundColor: isMale ? Colors.blue : Colors.white,
+                        foregroundColor: isMale ? Colors.white : Colors.blue,
                         elevation: 0,
+                        side: BorderSide(color: Colors.blue),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            8,
-                          ),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       child: Text(
                         'ชาย',
                         style: TextStyle(
-                          color: Colors.blue,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -88,22 +100,25 @@ class _BmrUIState extends State<BmrUI> {
                     width: 16,
                   ),
                   Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: Colors.grey,
-                        ),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          isMale = false;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isMale ? Colors.white : Colors.pink,
+                        foregroundColor: isMale ? Colors.pink : Colors.white,
+                        elevation: 0,
+                        side: BorderSide(color: Colors.pink),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            8,
-                          ),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       child: Text(
                         'หญิง',
                         style: TextStyle(
-                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -124,6 +139,7 @@ class _BmrUIState extends State<BmrUI> {
                 height: 8,
               ),
               TextField(
+                controller: weightCtrl,
                 decoration: InputDecoration(
                   hintText: 'กรอกน้ำหนักของคุณ',
                   hintStyle: TextStyle(
@@ -152,6 +168,7 @@ class _BmrUIState extends State<BmrUI> {
                 height: 8,
               ),
               TextField(
+                controller: heightCtrl,
                 decoration: InputDecoration(
                   hintText: 'กรอกส่วนสูงของคุณ',
                   hintStyle: TextStyle(
@@ -162,9 +179,7 @@ class _BmrUIState extends State<BmrUI> {
                     vertical: 12,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      4,
-                    ),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                 ),
               ),
@@ -182,6 +197,7 @@ class _BmrUIState extends State<BmrUI> {
                 height: 8,
               ),
               TextField(
+                controller: ageCtrl,
                 decoration: InputDecoration(
                   hintText: 'กรอกอายุของคุณ',
                   hintStyle: TextStyle(
@@ -200,16 +216,37 @@ class _BmrUIState extends State<BmrUI> {
                 height: 24,
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  if(weightCtrl.text.isEmpty || heightCtrl.text.isEmpty || ageCtrl.text.isEmpty){
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('กรุณากรอกข้อมูลให้ครบถ้วน'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
+                  double widget = double.parse(weightCtrl.text);
+                  double height = double.parse(heightCtrl.text);
+                  int age = int.parse(ageCtrl.text);
+                  double bmr = 0;
+                  if(isMale == true){
+                    bmr = 88.362 + (13.397 * widget) + (4.799 * height) + (5.677 * age);
+                  } else{
+                    bmr = 447.593 + (9.247 * widget) + (3.098 * height) + (4.330 * age);
+                  }
+                  setState(() {
+                    bmrValue = bmr.toStringAsFixed(2);
+                  });
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   padding: EdgeInsets.symmetric(
                     vertical: 14,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      30,
-                    ),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 child: Text(
@@ -231,9 +268,7 @@ class _BmrUIState extends State<BmrUI> {
                     vertical: 14,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      30,
-                    ),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 child: Text(
@@ -269,7 +304,7 @@ class _BmrUIState extends State<BmrUI> {
                       height: 4,
                     ),
                     Text(
-                      '0.00',
+                      bmrValue,
                       style: TextStyle(
                         color: Colors.red,
                         fontSize: 36,

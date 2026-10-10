@@ -10,6 +10,19 @@ class BmiUI extends StatefulWidget {
 }
 
 class _BmiUIState extends State<BmiUI> {
+  final TextEditingController weightCtrl = TextEditingController();
+  final TextEditingController heightCtrl = TextEditingController();
+
+  String bmiValue = '0.00';
+  String bmiResult = 'ยังไม่มีข้อมูล';
+
+  @override
+  void dispose() {
+    weightCtrl.dispose();
+    heightCtrl.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,6 +74,8 @@ class _BmiUIState extends State<BmiUI> {
                 height: 8,
               ),
               TextField(
+                controller: weightCtrl,
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   hintText: 'กรอกน้ำหนักของคุณ',
                   hintStyle: TextStyle(
@@ -71,9 +86,7 @@ class _BmiUIState extends State<BmiUI> {
                     vertical: 12,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      4,
-                    ),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                 ),
               ),
@@ -91,6 +104,8 @@ class _BmiUIState extends State<BmiUI> {
                 height: 8,
               ),
               TextField(
+                controller: heightCtrl,
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   hintText: 'กรอกส่วนสูงของคุณ',
                   hintStyle: TextStyle(
@@ -109,16 +124,37 @@ class _BmiUIState extends State<BmiUI> {
                 height: 24,
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  if (weightCtrl.text.isEmpty || heightCtrl.text.isEmpty) {
+                    return;
+                  }
+
+                  double weight = double.parse(weightCtrl.text);
+                  double height = double.parse(heightCtrl.text);
+                  double bmi = weight / ((height / 100) * (height / 100));
+
+                  setState(() {
+                    bmiValue = bmi.toStringAsFixed(2);
+                    if (bmi < 18.5) {
+                      bmiResult = 'น้ำหนักต่ำกว่าเกณฑ์';
+                    } else if (bmi <= 22.9) {
+                      bmiResult = 'น้ำหนักสมส่วน';
+                    } else if (bmi <= 24.9) {
+                      bmiResult = 'น้ำหนักเกิน';
+                    } else if (bmi <= 29.9) {
+                      bmiResult = 'โรคอ้วนระดับ 1';
+                    } else {
+                      bmiResult = 'โรคอ้วนระดับ 2';
+                    }
+                  });
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   padding: EdgeInsets.symmetric(
                     vertical: 14,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      30,
-                    ),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 child: Text(
@@ -133,16 +169,21 @@ class _BmiUIState extends State<BmiUI> {
                 height: 12,
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    weightCtrl.clear();
+                    heightCtrl.clear();
+                    bmiValue = '0.00';
+                    bmiResult = 'ยังไม่มีข้อมูล';
+                  });
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey,
                   padding: EdgeInsets.symmetric(
                     vertical: 14,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      30,
-                    ),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 child: Text(
@@ -172,13 +213,13 @@ class _BmiUIState extends State<BmiUI> {
                         color: Colors.black,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                  ),
+                      ),
                     ),
                     SizedBox(
                       height: 4,
                     ),
                     Text(
-                      '0.00',
+                      bmiValue,
                       style: TextStyle(
                         color: const Color.fromARGB(255, 253, 28, 11),
                         fontSize: 36,
@@ -189,10 +230,10 @@ class _BmiUIState extends State<BmiUI> {
                       height: 4,
                     ),
                     Text(
-                      'การแปรผล',
+                      bmiResult,
                       style: TextStyle(
                         color: Colors.black87,
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
